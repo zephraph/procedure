@@ -66,12 +66,10 @@ it("errors if no case matches without fallback", async () => {
       ])
       .exec()
   ).rejects.toMatchInlineSnapshot(`
-          "Match statement unhandled, add a fallback
-
-            61 |   await expect(
+          "  61 |   await expect(
             62 |     procedure(\\"match test\\", { foo: \\"bar\\" })
           > 63 |       .match([
-               |        ^
+               |        ^ Match statement unhandled, add a fallback
             64 |         [fooHasNoBar, testFailed],
             65 |         [fooHasNoBar, testFailed],
             66 |       ])"

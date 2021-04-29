@@ -14,12 +14,10 @@ it("rejects when a validation is unsuccessful", async () => {
       .validate("test", (t) => t === false)
       .exec()
   ).rejects.toMatchInlineSnapshot(`
-          "test is invalid 
-
-            12 |   await expect(
+          "  12 |   await expect(
             13 |     procedure(\\"test\\", { test: true })
           > 14 |       .validate(\\"test\\", (t) => t === false)
-               |        ^
+               |        ^ test is invalid 
             15 |       .exec()
             16 |   ).rejects.toMatchInlineSnapshot(\`
             17 |           \\"test is invalid "
