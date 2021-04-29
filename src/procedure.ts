@@ -1,8 +1,7 @@
 import { Match, MatchAction, MatchStatement, Operation } from "./operations";
 import { execute } from "./executors";
 import StackTracey from "stacktracey";
-
-
+import { last } from "./utils";
 
 export class Procedure<C extends Record<string, unknown>> {
   private operations: Operation[] = [];
@@ -11,28 +10,37 @@ export class Procedure<C extends Record<string, unknown>> {
   /**
    * A method to ensure a value stored in the `context` is correct
    */
-  validate(key: keyof C, validateFn: (value: C[typeof key]) => boolean | Promise<boolean>) {
-      this.operations.push({
-        type: "validate",
-        run: validateFn,
-        argKey: key,
-        context: this.context,
-        stackSource: new StackTracey().slice(1)
-      });
+  validate(
+    key: keyof C,
+    validateFn: (value: C[typeof key]) => boolean | Promise<boolean>
+  ) {
+    this.operations.push({
+      type: "validate",
+      run: validateFn,
+      argKey: key,
+      context: this.context,
+      stackSource: new StackTracey().slice(1),
+    });
     return this;
   }
 
   /**
    * A method to update a value in context (usually from values already stored in the context)
    */
-  update(key: keyof C, updateFn: (currentValue: C[typeof key], context: C) => C[typeof key] | Promise<C[typeof key]>) {
+  update(
+    key: keyof C,
+    updateFn: (
+      currentValue: C[typeof key],
+      context: C
+    ) => C[typeof key] | Promise<C[typeof key]>
+  ) {
     this.operations.push({
       type: "update",
       run: updateFn,
       argKey: key,
       context: this.context,
-      stackSource: new StackTracey().slice(1)
-    })
+      stackSource: new StackTracey().slice(1),
+    });
     return this;
   }
 
@@ -42,21 +50,34 @@ export class Procedure<C extends Record<string, unknown>> {
    */
   load(loadFn: (context: C) => C | Promise<C>) {
     this.operations.push({
-      type: 'load',
+      type: "load",
       run: loadFn,
       context: this.context,
-      stackSource: new StackTracey().slice(1)
-    })
+      stackSource: new StackTracey().slice(1),
+    });
     return this;
   }
 
   do(doFn: (context: C) => void | Promise<void>) {
     this.operations.push({
-      type: 'do',
+      type: "do",
       run: doFn,
       context: this.context,
-      stackSource: new StackTracey().slice(1)
-    })
+      stackSource: new StackTracey().slice(1),
+    });
+    return this;
+  }
+
+  /**
+   * A method to add extra error handling to the previous function
+   */
+  or(
+    orFn: (
+      err: Error,
+      context: C
+    ) => void | Partial<C> | Promise<void | Partial<C>>
+  ) {
+    last(this.operations).onError = orFn;
     return this;
   }
 
@@ -66,22 +87,24 @@ export class Procedure<C extends Record<string, unknown>> {
    */
   match(statements: MatchStatement<C>[], otherwise?: MatchAction<C>) {
     this.operations.push({
-      type: 'match',
+      type: "match",
       statements,
       otherwise,
       context: this.context,
-      stackSource: new StackTracey().slice(1)
-    })
-    return this
+      stackSource: new StackTracey().slice(1),
+    });
+    return this;
   }
-
 
   exec() {
     return execute(this.operations);
   }
 }
 
-export const procedure = <C extends Record<string, unknown>>(name: string, context: C) => {
+export const procedure = <C extends Record<string, unknown>>(
+  name: string,
+  context: C
+) => {
   return new Procedure(name, context);
 };
 

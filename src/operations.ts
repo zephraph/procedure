@@ -20,13 +20,15 @@ export interface Load extends BaseOperation {
   run: (arg: any) => any | Promise<any>;
 }
 
-export type MatchCondition<C> = (context: C) => boolean | Promise<boolean>
-export type MatchAction<C> = (context: C) => void | Partial<C> | Promise<void | Partial<C>> 
-export type MatchStatement<C> = [...MatchCondition<C>[], MatchAction<C>]
+export type MatchCondition<C> = (context: C) => boolean | Promise<boolean>;
+export type MatchAction<C> = (
+  context: C
+) => void | Partial<C> | Promise<void | Partial<C>>;
+export type MatchStatement<C> = [...MatchCondition<C>[], MatchAction<C>];
 export interface Match extends BaseOperation {
   type: "match";
-  statements: MatchStatement<any>[]
-  otherwise?: MatchAction<any>
+  statements: MatchStatement<any>[];
+  otherwise?: MatchAction<any>;
 }
 
 export interface Do extends BaseOperation {
@@ -41,6 +43,11 @@ export interface GoTo extends BaseOperation {
 interface BaseOperation {
   readonly type: string;
   label?: string;
+  onError?: (
+    err: Error,
+    context: any
+  ) => any | Promise<any>
+    
   /**
    * Note: An error is created in the original call site to link back to the code that's actually
    * triggering the error, not from the process it's being called in.
