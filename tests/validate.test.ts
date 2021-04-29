@@ -20,6 +20,6 @@ it("rejects when a validation is unsuccessful", async () => {
                |        ^ test is invalid 
             15 |       .exec()
             16 |   ).rejects.toMatchInlineSnapshot(\`
-            17 |           \\"test is invalid "
+            17 |           \\"  12 |   await expect("
         `);
 });

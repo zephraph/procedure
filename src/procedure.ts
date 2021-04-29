@@ -50,6 +50,16 @@ export class Procedure<C extends Record<string, unknown>> {
     return this;
   }
 
+  do(doFn: (context: C) => void | Promise<void>) {
+    this.operations.push({
+      type: 'do',
+      run: doFn,
+      context: this.context,
+      stackSource: new StackTracey().slice(1)
+    })
+    return this;
+  }
+
   /**
    * A method that will execute multiple condition statements and run
    * an associated action for the first condition that returns true.
@@ -64,6 +74,7 @@ export class Procedure<C extends Record<string, unknown>> {
     })
     return this
   }
+
 
   exec() {
     return execute(this.operations);
