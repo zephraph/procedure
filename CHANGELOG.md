@@ -1,3 +1,15 @@
+# v0.0.3 (Fri May 07 2021)
+
+#### ⚠️ Pushed to `master`
+
+- Fix git ignore ([@zephraph](https://github.com/zephraph))
+
+#### Authors: 1
+
+- Justin Bennett ([@zephraph](https://github.com/zephraph))
+
+---
+
 # v0.0.2 (Fri May 07 2021)
 
 #### 🐛 Bug Fix
