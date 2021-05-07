@@ -1,6 +1,6 @@
 {
   "name": "@zephraph/procedure",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A library for simplifying verbose procedural workflows",
   "author": {
     "email": "zephraph@gmail.com",
