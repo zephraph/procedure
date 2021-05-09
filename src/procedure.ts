@@ -48,7 +48,7 @@ export class Procedure<C extends Record<string, unknown>> {
    * A method intended to load data from some source and to store it in the
    * `context`.
    */
-  load(loadFn: (context: C) => C | Promise<C>) {
+  load(loadFn: (context: C) => Partial<C> | Promise<Partial<C>>) {
     this.operations.push({
       type: "load",
       run: loadFn,
