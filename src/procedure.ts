@@ -10,9 +10,9 @@ export class Procedure<C extends Record<string, unknown>> {
   /**
    * A method to ensure a value stored in the `context` is correct
    */
-  validate(
-    key: keyof C,
-    validateFn: (value: C[typeof key]) => boolean | Promise<boolean>
+  validate<K extends keyof C>(
+    key: K,
+    validateFn: (value: C[K]) => boolean | Promise<boolean>
   ) {
     this.operations.push({
       type: "validate",
@@ -27,12 +27,12 @@ export class Procedure<C extends Record<string, unknown>> {
   /**
    * A method to update a value in context (usually from values already stored in the context)
    */
-  update(
-    key: keyof C,
+  update<K extends keyof C>(
+    key: K,
     updateFn: (
-      currentValue: C[typeof key],
+      currentValue: C[K],
       context: C
-    ) => C[typeof key] | Promise<C[typeof key]>
+    ) => C[K] | Promise<C[K]>
   ) {
     this.operations.push({
       type: "update",
