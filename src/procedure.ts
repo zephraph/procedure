@@ -3,9 +3,9 @@ import { execute } from "./executors";
 import StackTracey from "stacktracey";
 import { last } from "./utils";
 
-export class Procedure<C extends Record<string, unknown>> {
-  private operations: Operation[] = [];
-  constructor(public readonly name: string, private context: C) {}
+class Procedure<C extends Record<string, unknown>> {
+  protected operations: Operation[] = [];
+  constructor(public readonly name: string, protected context: C) {}
 
   /**
    * A method to ensure a value stored in the `context` is correct
@@ -95,17 +95,27 @@ export class Procedure<C extends Record<string, unknown>> {
     });
     return this;
   }
+}
 
+class ProcedureWithEagerContext<C extends Record<string, unknown>> extends Procedure<C> {
   exec() {
     return execute(this.operations);
   }
 }
+class ProcedureWithLazyContext<C extends Record<string, unknown>> extends Procedure<C> {
+  exec(context: C) {
+    this.context = context;
+    return execute(this.operations);
+  }
+}
 
-export const procedure = <C extends Record<string, unknown>>(
+export function procedure<C extends Record<string, unknown>>(name: string, context: C): ProcedureWithEagerContext<C>
+export function procedure<C extends Record<string, unknown>>(name: string): ProcedureWithLazyContext<C>
+export function procedure<C extends Record<string, unknown>>(
   name: string,
-  context: C
-) => {
-  return new Procedure(name, context);
+  context?: C
+) {
+  return context ? new ProcedureWithEagerContext(name, context) : new ProcedureWithLazyContext(name, {} as C);
 };
 
 /**
