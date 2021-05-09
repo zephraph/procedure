@@ -1,6 +1,6 @@
 {
   "name": "@zephraph/procedure",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A library for simplifying verbose procedural workflows",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
