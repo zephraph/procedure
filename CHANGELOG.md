@@ -1,3 +1,15 @@
+# v0.0.4 (Sun May 09 2021)
+
+#### ⚠️ Pushed to `master`
+
+- Add entry points ([@zephraph](https://github.com/zephraph))
+
+#### Authors: 1
+
+- Justin Bennett ([@zephraph](https://github.com/zephraph))
+
+---
+
 # v0.0.3 (Fri May 07 2021)
 
 #### ⚠️ Pushed to `master`
