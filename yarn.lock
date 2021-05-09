@@ -1294,23 +1294,10 @@ esbuild-jest@^0.5.0:
     "@babel/plugin-transform-modules-commonjs" "^7.12.13"
     babel-jest "^26.6.3"
 
-esbuild-register@^2.5.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/esbuild-register/-/esbuild-register-2.5.0.tgz#b855d8cfa963835a16866146e310691bd8afa4f5"
-  integrity sha512-5a8W3rH7IQbIPR9pPXJFkC3+CRMtm/OSpBz3hkWUUU63oPZ3NU6dVDGfaIjKnRizCTIRoGjNE6KEDt5p1sLwEw==
-  dependencies:
-    esbuild "^0.11.5"
-    jsonc-parser "^3.0.0"
-
 esbuild@^0.11.12:
   version "0.11.12"
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.11.12.tgz#8cbe15bcb44212624c3e77c896a835f74dc71c3c"
   integrity sha512-c8cso/1RwVj+fbDvLtUgSG4ZJQ0y9Zdrl6Ot/GAjyy4pdMCHaFnDMts5gqFnWRPLajWtEnI+3hlET4R9fVoZng==
-
-esbuild@^0.11.5:
-  version "0.11.15"
-  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.11.15.tgz#d92250e1755294f84bc7a83ed191e60baadf7b6a"
-  integrity sha512-Hh40byWZZgYbiLhcoOWiOUIy8yUYQeCEA4F9feWytToD2jGfJ1X4VPf5dsqj6vRL29H3YmFqZsxIJa5q0ifB3g==
 
 escalade@^3.1.1:
   version "3.1.1"
@@ -2434,11 +2421,6 @@ json5@^2.1.2:
   integrity sha512-f+8cldu7X/y7RAJurMEJmdoKXGB/X550w2Nr3tTbezL6RwEE/iMcm+tZnXeoZtKuOq6ft8+CqzEkrIgx1fPoQA==
   dependencies:
     minimist "^1.2.5"
-
-jsonc-parser@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/jsonc-parser/-/jsonc-parser-3.0.0.tgz#abdd785701c7e7eaca8a9ec8cf070ca51a745a22"
-  integrity sha512-fQzRfAbIBnR0IQvftw9FJveWiHp72Fg20giDrHz6TdfB12UH/uue0D3hm57UB5KgAVuniLMCaS8P1IMj9NR7cA==
 
 jsprim@^1.2.2:
   version "1.4.1"

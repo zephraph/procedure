@@ -1,4 +1,4 @@
-import { Match, MatchAction, MatchStatement, Operation } from "./operations";
+import { MatchAction, MatchStatement, Operation } from "./operations";
 import { execute } from "./executors";
 import StackTracey from "stacktracey";
 import { last } from "./utils";
