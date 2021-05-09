@@ -3,7 +3,7 @@ import { execute } from "./executors";
 import StackTracey from "stacktracey";
 import { last } from "./utils";
 
-class Procedure<C extends Record<string, unknown>> {
+export class Procedure<C extends Record<string, unknown>> {
   protected operations: Operation[] = [];
   constructor(public readonly name: string, protected context: C) {}
 
@@ -97,12 +97,12 @@ class Procedure<C extends Record<string, unknown>> {
   }
 }
 
-class ProcedureWithEagerContext<C extends Record<string, unknown>> extends Procedure<C> {
+export class ProcedureWithEagerContext<C extends Record<string, unknown>> extends Procedure<C> {
   exec() {
     return execute(this.operations);
   }
 }
-class ProcedureWithLazyContext<C extends Record<string, unknown>> extends Procedure<C> {
+export class ProcedureWithLazyContext<C extends Record<string, unknown>> extends Procedure<C> {
   exec(context: C) {
     this.context = context;
     return execute(this.operations);
