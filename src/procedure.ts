@@ -104,7 +104,7 @@ export class ProcedureWithEagerContext<C extends Record<string, unknown>> extend
 }
 export class ProcedureWithLazyContext<C extends Record<string, unknown>> extends Procedure<C> {
   exec(context: C) {
-    this.context = context;
+    Object.assign(this.context, context)
     return execute(this.operations);
   }
 }

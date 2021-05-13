@@ -1,5 +1,6 @@
 import StackTracey from "stacktracey";
 import { Context } from "./context";
+import { ProcedureWithLazyContext } from "./procedure";
 
 export type Operation = Validate | Update | Load | Match | Do | GoTo;
 
@@ -21,10 +22,14 @@ export interface Load extends BaseOperation {
 }
 
 export type MatchCondition<C> = (context: C) => boolean | Promise<boolean>;
-export type MatchAction<C> = (
-  context: C
-) => void | Partial<C> | Promise<void | Partial<C>>;
-export type MatchStatement<C> = [...MatchCondition<C>[], MatchAction<C>];
+export type MatchAction<C extends Context> =
+  | ProcedureWithLazyContext<Partial<C>>
+  | ((context: C) => void | Partial<C> | Promise<void | Partial<C>>);
+
+export type MatchStatement<C extends Context> = [
+  ...MatchCondition<C>[],
+  MatchAction<C>
+];
 export interface Match extends BaseOperation {
   type: "match";
   statements: MatchStatement<any>[];
@@ -43,11 +48,8 @@ export interface GoTo extends BaseOperation {
 interface BaseOperation {
   readonly type: string;
   label?: string;
-  onError?: (
-    err: Error,
-    context: any
-  ) => any | Promise<any>
-    
+  onError?: (err: Error, context: any) => any | Promise<any>;
+
   /**
    * Note: An error is created in the original call site to link back to the code that's actually
    * triggering the error, not from the process it's being called in.
