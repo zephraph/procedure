@@ -9,17 +9,22 @@ it("resolves when a validation is successful", async () => {
 });
 
 it("rejects when a validation is unsuccessful", async () => {
+  const isTestValid = (t) => t === false;
   await expect(
-    procedure("test", { test: true })
-      .validate("test", (t) => t === false)
-      .exec()
+    procedure("test", { test: true }).validate("test", isTestValid).exec()
   ).rejects.toMatchInlineSnapshot(`
-          "  12 |   await expect(
-            13 |     procedure(\\"test\\", { test: true })
-          > 14 |       .validate(\\"test\\", (t) => t === false)
-               |        ^ test is invalid 
-            15 |       .exec()
-            16 |   ).rejects.toMatchInlineSnapshot(\`
-            17 |           \\"  12 |   await expect("
+          [ProcedureError: Unhandled Internal Exception
+
+            12 |   const isTestValid = (t) => t === false;
+            13 |   await expect(
+          > 14 |     procedure("test", { test: true }).validate("test", isTestValid).exec()
+               |                                       ^ test is invalid according to isTestValid
+            15 |   ).rejects.toMatchInlineSnapshot(\`
+            16 |           [ProcedureError: Unhandled Internal Exception
+            17 |
+
+          tests/validate.test.ts:14:39
+
+          ]
         `);
 });

@@ -1,20 +1,21 @@
-import { Match, MatchAction, MatchStatement, Operation } from "./operations";
+import { MatchAction, MatchStatement, Operation } from "./operations";
 import { execute } from "./executors";
 import StackTracey from "stacktracey";
 import { last } from "./utils";
 
 export class Procedure<C extends Record<string, unknown>> {
-  private operations: Operation[] = [];
-  constructor(public readonly name: string, private context: C) {}
+  protected operations: Operation[] = [];
+  constructor(public readonly name: string, protected context: C) {}
 
   /**
    * A method to ensure a value stored in the `context` is correct
    */
-  validate(
-    key: keyof C,
-    validateFn: (value: C[typeof key]) => boolean | Promise<boolean>
+  validate<K extends keyof C>(
+    key: K,
+    validateFn: (value: C[K]) => boolean | Promise<boolean>
   ) {
     this.operations.push({
+      procedure: this.name,
       type: "validate",
       run: validateFn,
       argKey: key,
@@ -27,14 +28,12 @@ export class Procedure<C extends Record<string, unknown>> {
   /**
    * A method to update a value in context (usually from values already stored in the context)
    */
-  update(
-    key: keyof C,
-    updateFn: (
-      currentValue: C[typeof key],
-      context: C
-    ) => C[typeof key] | Promise<C[typeof key]>
+  update<K extends keyof C>(
+    key: K,
+    updateFn: (currentValue: C[K], context: C) => C[K] | Promise<C[K]>
   ) {
     this.operations.push({
+      procedure: this.name,
       type: "update",
       run: updateFn,
       argKey: key,
@@ -48,8 +47,9 @@ export class Procedure<C extends Record<string, unknown>> {
    * A method intended to load data from some source and to store it in the
    * `context`.
    */
-  load(loadFn: (context: C) => C | Promise<C>) {
+  load(loadFn: (context: C) => Partial<C> | Promise<Partial<C>>) {
     this.operations.push({
+      procedure: this.name,
       type: "load",
       run: loadFn,
       context: this.context,
@@ -60,6 +60,7 @@ export class Procedure<C extends Record<string, unknown>> {
 
   do(doFn: (context: C) => void | Promise<void>) {
     this.operations.push({
+      procedure: this.name,
       type: "do",
       run: doFn,
       context: this.context,
@@ -87,6 +88,7 @@ export class Procedure<C extends Record<string, unknown>> {
    */
   match(statements: MatchStatement<C>[], otherwise?: MatchAction<C>) {
     this.operations.push({
+      procedure: this.name,
       type: "match",
       statements,
       otherwise,
@@ -95,18 +97,39 @@ export class Procedure<C extends Record<string, unknown>> {
     });
     return this;
   }
+}
 
+export class ProcedureWithEagerContext<
+  C extends Record<string, unknown>
+> extends Procedure<C> {
   exec() {
     return execute(this.operations);
   }
 }
+export class ProcedureWithLazyContext<
+  C extends Record<string, unknown>
+> extends Procedure<C> {
+  exec(context: C) {
+    Object.assign(this.context, context);
+    return execute(this.operations);
+  }
+}
 
-export const procedure = <C extends Record<string, unknown>>(
+export function procedure<C extends Record<string, unknown>>(
   name: string,
   context: C
-) => {
-  return new Procedure(name, context);
-};
+): ProcedureWithEagerContext<C>;
+export function procedure<C extends Record<string, unknown>>(
+  name: string
+): ProcedureWithLazyContext<C>;
+export function procedure<C extends Record<string, unknown>>(
+  name: string,
+  context?: C
+) {
+  return context
+    ? new ProcedureWithEagerContext(name, context)
+    : new ProcedureWithLazyContext(name, {} as C);
+}
 
 /**
  * procedure('install', context)
