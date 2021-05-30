@@ -1,3 +1,15 @@
+# v0.1.0 (Sun May 30 2021)
+
+#### 🚀 Enhancement
+
+- Refactor build, improve error messages [#3](https://github.com/zephraph/procedure/pull/3) ([@zephraph](https://github.com/zephraph))
+
+#### Authors: 1
+
+- Justin Bennett ([@zephraph](https://github.com/zephraph))
+
+---
+
 # v0.0.4 (Sun May 09 2021)
 
 #### ⚠️ Pushed to `master`
