@@ -47,7 +47,7 @@ export interface GoTo extends BaseOperation {
 
 interface BaseOperation {
   readonly type: string;
-  label?: string;
+  readonly procedure: string;
   onError?: (err: Error, context: any) => any | Promise<any>;
 
   /**

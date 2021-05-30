@@ -66,13 +66,19 @@ it("errors if no case matches without fallback", async () => {
       ])
       .exec()
   ).rejects.toMatchInlineSnapshot(`
-          "  61 |   await expect(
-            62 |     procedure(\\"match test\\", { foo: \\"bar\\" })
+          [[1m[31mProcedureError[39m[22m: Unhandled Internal Exception
+
+            61 |   await expect(
+            62 |     procedure("match test", { foo: "bar" })
           > 63 |       .match([
                |        ^ Match statement unhandled, add a fallback
             64 |         [fooHasNoBar, testFailed],
             65 |         [fooHasNoBar, testFailed],
-            66 |       ])"
+            66 |       ])
+
+          [2mtests/match.test.ts:63:8[22m
+
+          ]
         `);
   expect(testFailed).not.toBeCalled();
 });

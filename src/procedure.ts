@@ -15,6 +15,7 @@ export class Procedure<C extends Record<string, unknown>> {
     validateFn: (value: C[K]) => boolean | Promise<boolean>
   ) {
     this.operations.push({
+      procedure: this.name,
       type: "validate",
       run: validateFn,
       argKey: key,
@@ -29,12 +30,10 @@ export class Procedure<C extends Record<string, unknown>> {
    */
   update<K extends keyof C>(
     key: K,
-    updateFn: (
-      currentValue: C[K],
-      context: C
-    ) => C[K] | Promise<C[K]>
+    updateFn: (currentValue: C[K], context: C) => C[K] | Promise<C[K]>
   ) {
     this.operations.push({
+      procedure: this.name,
       type: "update",
       run: updateFn,
       argKey: key,
@@ -50,6 +49,7 @@ export class Procedure<C extends Record<string, unknown>> {
    */
   load(loadFn: (context: C) => Partial<C> | Promise<Partial<C>>) {
     this.operations.push({
+      procedure: this.name,
       type: "load",
       run: loadFn,
       context: this.context,
@@ -60,6 +60,7 @@ export class Procedure<C extends Record<string, unknown>> {
 
   do(doFn: (context: C) => void | Promise<void>) {
     this.operations.push({
+      procedure: this.name,
       type: "do",
       run: doFn,
       context: this.context,
@@ -87,6 +88,7 @@ export class Procedure<C extends Record<string, unknown>> {
    */
   match(statements: MatchStatement<C>[], otherwise?: MatchAction<C>) {
     this.operations.push({
+      procedure: this.name,
       type: "match",
       statements,
       otherwise,
@@ -97,26 +99,37 @@ export class Procedure<C extends Record<string, unknown>> {
   }
 }
 
-export class ProcedureWithEagerContext<C extends Record<string, unknown>> extends Procedure<C> {
+export class ProcedureWithEagerContext<
+  C extends Record<string, unknown>
+> extends Procedure<C> {
   exec() {
     return execute(this.operations);
   }
 }
-export class ProcedureWithLazyContext<C extends Record<string, unknown>> extends Procedure<C> {
+export class ProcedureWithLazyContext<
+  C extends Record<string, unknown>
+> extends Procedure<C> {
   exec(context: C) {
-    Object.assign(this.context, context)
+    Object.assign(this.context, context);
     return execute(this.operations);
   }
 }
 
-export function procedure<C extends Record<string, unknown>>(name: string, context: C): ProcedureWithEagerContext<C>
-export function procedure<C extends Record<string, unknown>>(name: string): ProcedureWithLazyContext<C>
+export function procedure<C extends Record<string, unknown>>(
+  name: string,
+  context: C
+): ProcedureWithEagerContext<C>;
+export function procedure<C extends Record<string, unknown>>(
+  name: string
+): ProcedureWithLazyContext<C>;
 export function procedure<C extends Record<string, unknown>>(
   name: string,
   context?: C
 ) {
-  return context ? new ProcedureWithEagerContext(name, context) : new ProcedureWithLazyContext(name, {} as C);
-};
+  return context
+    ? new ProcedureWithEagerContext(name, context)
+    : new ProcedureWithLazyContext(name, {} as C);
+}
 
 /**
  * procedure('install', context)

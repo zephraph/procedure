@@ -25,6 +25,7 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
+    "endent": "^2.0.1",
     "stacktracey": "^2.1.7",
     "ts-union-tools": "^0.0.1"
   },

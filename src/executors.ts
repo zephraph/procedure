@@ -1,5 +1,6 @@
+import StackTracey from "stacktracey";
 import { matchOn } from "ts-union-tools";
-import { createError, ERROR } from "./error";
+import { createError, createMatchError, ERROR } from "./error";
 import {
   Validate,
   Load,
@@ -12,6 +13,9 @@ import {
 } from "./operations";
 import { Procedure } from "./procedure";
 import { last, to } from "./utils";
+import { bold } from "chalk";
+
+const hasErrorHandler = (op: Operation) => !!op.onError;
 
 const handleError = async (op: Operation, err: Error) => {
   if (!op.onError) return err;
@@ -31,7 +35,7 @@ const validate: OperationExecutor<Validate> = async (op) => {
     throw createError(
       op.stackSource,
       `${op.argKey} is invalid ${
-        op.run.name ? `according to ${op.run.name}` : ""
+        op.run.name ? `according to ${bold(op.run.name)}` : ""
       }`,
       ERROR.INVALID(op.argKey)
     );
@@ -50,28 +54,66 @@ const update: OperationExecutor<Update> = async (op) => {
 };
 
 const load: OperationExecutor<Load> = async (op) => {
-  try {
-    const [err, context] = await to(Promise.resolve(op.run(op.context)));
-    if (err) return await handleError(op, err);
-    Object.assign(op.context, context);
-  } catch (err) {
+  const [err, context] = await to(Promise.resolve(op.run(op.context)));
+  if (err && hasErrorHandler(op)) {
     return await handleError(op, err);
+  } else if (err) {
+    const { name } = op.run;
+    let trace = new StackTracey(err);
+    const index = trace.items.findIndex(
+      (item) => item.calleeShort.split(" ")[0] === name
+    );
+    if (index > 0) {
+      trace = trace.slice(0, index + 1);
+    }
+    throw createError(op.stackSource, err, "oops", trace);
+  } else {
+    Object.assign(op.context, context);
   }
 };
 
 const match: OperationExecutor<Match> = async (op) => {
-  statementLoop: for (let statement of op.statements) {
+  statementLoop: for (let [
+    statementNum,
+    statement,
+  ] of op.statements.entries()) {
     const conditions = statement.slice(0, -1) as MatchCondition<any>[];
     const action = last(statement) as MatchAction<any>;
-    for (let condition of conditions) {
-      const [err, result] = await to(condition(op.context));
-      if (err) return await handleError(op, err);
+    for (let [index, condition] of conditions.entries()) {
+      let [err, result] = await to(condition(op.context));
+      if (err) {
+        const temp = await handleError(op, err);
+        if (temp instanceof Error) {
+          throw createMatchError(
+            { type: "statement", index, pos: statementNum },
+            op.stackSource,
+            op.procedure,
+            "boop",
+            "boop"
+          );
+        }
+        return temp;
+      }
       if (!result) continue statementLoop;
     }
-    const [err, result] = await to(
+    let [err, result] = await to(
       action instanceof Procedure ? action.exec(op.context) : action(op.context)
     );
-    if (err) return await handleError(op, err);
+    if (err) {
+      const temp = await handleError(op, err);
+      if (temp instanceof Error) {
+        const [message, ...details] = temp.toString().split("\n");
+        throw createMatchError(
+          { type: "statement", index: statement.length - 1, pos: statementNum },
+          op.stackSource,
+          op.procedure,
+          message.trim().replace(/\d+ \|/, ""),
+          ERROR.MATCH_CHECK_ERR(action.name),
+          details.join("\n")
+        );
+      }
+      result = temp;
+    }
     if (result) {
       Object.assign(op.context, result);
     }
@@ -122,11 +164,7 @@ export const execute = async (operations: Operation[]) => {
       },
     });
     if (result !== undefined) {
-      throw createError(
-        operation.stackSource,
-        result as string,
-        ERROR.UNKNOWN_ERR
-      );
+      throw createError(operation.stackSource, result, ERROR.UNKNOWN_ERR);
     }
   }
 };
