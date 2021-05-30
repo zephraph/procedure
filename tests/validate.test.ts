@@ -20,7 +20,7 @@ it("rejects when a validation is unsuccessful", async () => {
           > 14 |     procedure("test", { test: true }).validate("test", isTestValid).exec()
                |                                       ^ test is invalid according to [1misTestValid[22m
             15 |   ).rejects.toMatchInlineSnapshot(\`
-            16 |           [ProcedureError: Unhandled Internal Exception
+            16 |           [[1m[31mProcedureError[39m[22m: Unhandled Internal Exception
             17 |
 
           [2mtests/validate.test.ts:14:39[22m
