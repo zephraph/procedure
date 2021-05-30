@@ -4,6 +4,7 @@ import { yellow, bold, dim, red } from "chalk";
 import { Context } from "./context";
 import { Operation } from "./operations";
 import { parseMatch } from "./parsers";
+import { style } from "./utils";
 import asTable from "as-table";
 
 const isNumber = (n: any) => typeof n === "number";
@@ -30,7 +31,7 @@ export const ERROR = {
 class ProcedureError extends Error {
   constructor(message: string, public readonly id: string) {
     super(message);
-    this.name = bold(red("ProcedureError"));
+    this.name = style("ProcedureError", bold, red);
   }
   toString() {
     return this.message;
@@ -54,8 +55,11 @@ export const createError = (
             .map((item, index) =>
               index === 0
                 ? [
-                    bold(`  ${red("failed:")} ${item.calleeShort}`),
-                    bold(item.fileShort + formatFilePosition(item)),
+                    style(
+                      `  ${style("failed:", red)} ${item.calleeShort}`,
+                      bold
+                    ),
+                    style(item.fileShort + formatFilePosition(item), bold),
                   ]
                 : [
                     `  called: ${item.calleeShort}`,
@@ -64,9 +68,11 @@ export const createError = (
             )
             .reverse()
         ) +
-        `\n${" ".repeat(10)}${bold(
-          red("^".repeat(errTrace.items[0].calleeShort.split(" ")[0].length))
-        )}️ ${bold(yellow("this threw the exception"))}`) ||
+        `\n${" ".repeat(10)}${style(
+          "^".repeat(errTrace.items[0].calleeShort.split(" ")[0].length),
+          bold,
+          red
+        )}️ ${style("this threw the exception", bold, yellow)}`) ||
     ""
   }`;
 
@@ -90,8 +96,9 @@ export const createError = (
           highlightCode: process.env.NODE_ENV === "test" ? false : true,
         }
       ) +
-      `\n\n${dim(
-        `${sourceTrace.fileRelative}${formatFilePosition(sourceTrace)}`
+      `\n\n${style(
+        `${sourceTrace.fileRelative}${formatFilePosition(sourceTrace)}`,
+        dim
       )}` +
       footer,
     code
@@ -111,7 +118,7 @@ export const createMatchError = (
   const stack = trace.withSource(trace.items[0]);
   const text = stack.sourceFile?.text!;
   // const header = `Unhandled Internal Exception\n\n`;
-  const footer = `${yellow("This error was caused by")} 👇\n`;
+  const footer = `${style("This error was caused by", yellow)} 👇\n`;
 
   let column = stack.column!;
   let line = stack.line!;
@@ -149,7 +156,7 @@ export const createMatchError = (
           highlightCode: process.env.NODE_ENV === "test" ? false : true,
         }
       ) +
-      `\n\n${dim(`${stack.fileRelative}:${line}:${column}`)}\n\n` +
+      `\n\n${style(`${stack.fileRelative}:${line}:${column}`, dim)}\n\n` +
       footer +
       // dim("\n───────────────────────────────────────────────") +
       details,

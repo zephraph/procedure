@@ -12,7 +12,7 @@ import {
   Update,
 } from "./operations";
 import { Procedure } from "./procedure";
-import { last, to } from "./utils";
+import { last, to, style } from "./utils";
 import { bold } from "chalk";
 
 const hasErrorHandler = (op: Operation) => !!op.onError;
@@ -35,7 +35,7 @@ const validate: OperationExecutor<Validate> = async (op) => {
     throw createError(
       op.stackSource,
       `${op.argKey} is invalid ${
-        op.run.name ? `according to ${bold(op.run.name)}` : ""
+        op.run.name ? `according to ${style(op.run.name, bold)}` : ""
       }`,
       ERROR.INVALID(op.argKey)
     );
