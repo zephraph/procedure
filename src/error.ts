@@ -118,7 +118,7 @@ export const createMatchError = (
   const stack = trace.withSource(trace.items[0]);
   const text = stack.sourceFile?.text!;
   // const header = `Unhandled Internal Exception\n\n`;
-  const footer = `${style("This error was caused by", yellow)} 👇\n`;
+  const footer = `${style("This error was caused by", yellow)} 👇\n\n`;
 
   let column = stack.column!;
   let line = stack.line!;

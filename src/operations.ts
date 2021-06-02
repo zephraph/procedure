@@ -55,5 +55,4 @@ interface BaseOperation {
    * triggering the error, not from the process it's being called in.
    */
   stackSource: StackTracey;
-  context: Context;
 }
