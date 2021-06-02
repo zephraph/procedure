@@ -1,3 +1,15 @@
+# v0.2.0 (Wed Jun 02 2021)
+
+#### 🚀 Enhancement
+
+- Pass context at the right time, fix errors missing stack traces [#4](https://github.com/zephraph/procedure/pull/4) ([@zephraph](https://github.com/zephraph))
+
+#### Authors: 1
+
+- Justin Bennett ([@zephraph](https://github.com/zephraph))
+
+---
+
 # v0.1.0 (Sun May 30 2021)
 
 #### 🚀 Enhancement
