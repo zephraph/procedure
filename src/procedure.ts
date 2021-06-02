@@ -19,7 +19,6 @@ export class Procedure<C extends Record<string, unknown>> {
       type: "validate",
       run: validateFn,
       argKey: key,
-      context: this.context,
       stackSource: new StackTracey().slice(1),
     });
     return this;
@@ -37,7 +36,6 @@ export class Procedure<C extends Record<string, unknown>> {
       type: "update",
       run: updateFn,
       argKey: key,
-      context: this.context,
       stackSource: new StackTracey().slice(1),
     });
     return this;
@@ -52,7 +50,6 @@ export class Procedure<C extends Record<string, unknown>> {
       procedure: this.name,
       type: "load",
       run: loadFn,
-      context: this.context,
       stackSource: new StackTracey().slice(1),
     });
     return this;
@@ -63,7 +60,6 @@ export class Procedure<C extends Record<string, unknown>> {
       procedure: this.name,
       type: "do",
       run: doFn,
-      context: this.context,
       stackSource: new StackTracey().slice(1),
     });
     return this;
@@ -92,7 +88,6 @@ export class Procedure<C extends Record<string, unknown>> {
       type: "match",
       statements,
       otherwise,
-      context: this.context,
       stackSource: new StackTracey().slice(1),
     });
     return this;
@@ -103,15 +98,14 @@ export class ProcedureWithEagerContext<
   C extends Record<string, unknown>
 > extends Procedure<C> {
   exec() {
-    return execute(this.operations);
+    return execute(this.operations, this.context);
   }
 }
 export class ProcedureWithLazyContext<
   C extends Record<string, unknown>
 > extends Procedure<C> {
   exec(context: C) {
-    Object.assign(this.context, context);
-    return execute(this.operations);
+    return execute(this.operations, context);
   }
 }
 
