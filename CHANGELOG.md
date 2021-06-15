@@ -1,3 +1,15 @@
+# v0.2.1 (Tue Jun 15 2021)
+
+#### 🐛 Bug Fix
+
+- Inline sourcemaps to ensure they can be read [#5](https://github.com/zephraph/procedure/pull/5) ([@zephraph](https://github.com/zephraph))
+
+#### Authors: 1
+
+- Justin Bennett ([@zephraph](https://github.com/zephraph))
+
+---
+
 # v0.2.0 (Wed Jun 02 2021)
 
 #### 🚀 Enhancement
