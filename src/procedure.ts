@@ -55,7 +55,11 @@ export class Procedure<C extends Record<string, unknown>> {
     return this;
   }
 
-  do(doFn: (context: C) => void | Promise<void>) {
+  do(
+    doFn:
+      | ProcedureWithLazyContext<Partial<C>>
+      | ((context: C) => void | Promise<void>)
+  ) {
     this.operations.push({
       procedure: this.name,
       type: "do",
