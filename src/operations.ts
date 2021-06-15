@@ -38,7 +38,9 @@ export interface Match extends BaseOperation {
 
 export interface Do extends BaseOperation {
   type: "do";
-  run: (context: any) => void | Promise<void>;
+  run:
+    | ProcedureWithLazyContext<Partial<any>>
+    | ((context: any) => void | Promise<void>);
 }
 
 export interface GoTo extends BaseOperation {

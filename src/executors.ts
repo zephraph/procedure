@@ -143,7 +143,9 @@ const match: OperationExecutor<Match> = async (op, context) => {
 
 const doEx: OperationExecutor<Do> = async (op, context) => {
   try {
-    const [err] = await to(op.run(context));
+    const [err] = await to(
+      op.run instanceof Procedure ? op.run.exec(context) : op.run(context)
+    );
     if (err) return await handleError(op, err, context);
   } catch (err) {
     return await handleError(op, err, context);
