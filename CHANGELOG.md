@@ -1,3 +1,15 @@
+# v0.3.0 (Tue Jun 15 2021)
+
+#### 🚀 Enhancement
+
+- Allow `do` to execute procedures passed to it [#6](https://github.com/zephraph/procedure/pull/6) ([@zephraph](https://github.com/zephraph))
+
+#### Authors: 1
+
+- Justin Bennett ([@zephraph](https://github.com/zephraph))
+
+---
+
 # v0.2.1 (Tue Jun 15 2021)
 
 #### 🐛 Bug Fix
