@@ -1,3 +1,15 @@
+# v1.0.0 (Wed Jun 16 2021)
+
+#### 💥 Breaking Change
+
+- Allow specifying context defaults [#8](https://github.com/zephraph/procedure/pull/8) ([@zephraph](https://github.com/zephraph))
+
+#### Authors: 1
+
+- Justin Bennett ([@zephraph](https://github.com/zephraph))
+
+---
+
 # v0.3.0 (Tue Jun 15 2021)
 
 #### 🚀 Enhancement
