@@ -1,12 +1,14 @@
-import { procedure } from '../src/procedure'
+import { procedure } from "../src/procedure";
 
 it("should handle errors from do", async () => {
   const context = {};
-  const err = "err"
+  const err = "err";
   const orFn = jest.fn().mockImplementation(() => {});
-  await procedure('do test', context)
-    .do(() => { throw err })
+  await procedure("do test")
+    .do(() => {
+      throw err;
+    })
     .or(orFn)
-    .exec()
-  expect(orFn).toBeCalledWith(err, context)
-})
+    .exec(context);
+  expect(orFn).toBeCalledWith(err, context);
+});

@@ -3,7 +3,7 @@ import { procedure } from "../src/procedure";
 it("should run something on do", async () => {
   let context = { foo: "bar" };
   let doFn = jest.fn();
-  await procedure("test", context).do(doFn).exec();
+  await procedure("test").do(doFn).exec(context);
   expect(doFn).toBeCalledWith(context);
 });
 

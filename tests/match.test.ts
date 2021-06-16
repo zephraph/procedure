@@ -5,21 +5,21 @@ const fooHasNoBar = ({ foo }: any) => foo !== "bar";
 
 it("matches on simple case", async () => {
   const testPassed = jest.fn();
-  await procedure("match test", { foo: "bar" })
+  await procedure("match test")
     .match([[fooHasBar, testPassed]])
-    .exec();
+    .exec({ foo: "bar" });
   expect(testPassed).toBeCalled();
 });
 
 it("matches on multiple cases", async () => {
   const testPassed = jest.fn();
   const testFailed = jest.fn();
-  await procedure("match test", { foo: "bar" })
+  await procedure("match test")
     .match([
       [fooHasNoBar, testFailed],
       [fooHasBar, testPassed],
     ])
-    .exec();
+    .exec({ foo: "bar" });
   expect(testPassed).toBeCalled();
   expect(testFailed).not.toBeCalled();
 });
@@ -27,7 +27,7 @@ it("matches on multiple cases", async () => {
 it("matches on first case without calling others", async () => {
   const testPassed = jest.fn();
   const testFailed = jest.fn();
-  await procedure("match test", { foo: "bar" })
+  await procedure("match test")
     .match(
       [
         [fooHasBar, testPassed],
@@ -35,7 +35,7 @@ it("matches on first case without calling others", async () => {
       ],
       testFailed
     )
-    .exec();
+    .exec({ foo: "bar" });
   expect(testPassed).toBeCalled();
   expect(testFailed).not.toBeCalled();
 });
@@ -43,7 +43,7 @@ it("matches on first case without calling others", async () => {
 it("uses fallback if one supplied and no other matches", async () => {
   const testPassed = jest.fn();
   const testFailed = jest.fn();
-  await procedure("match test", { foo: "bar" })
+  await procedure("match test")
     .match(
       [
         [fooHasNoBar, testFailed],
@@ -51,7 +51,7 @@ it("uses fallback if one supplied and no other matches", async () => {
       ],
       testPassed
     )
-    .exec();
+    .exec({ foo: "bar" });
   expect(testPassed).toBeCalled();
   expect(testFailed).not.toBeCalled();
 });
@@ -59,17 +59,17 @@ it("uses fallback if one supplied and no other matches", async () => {
 it("errors if no case matches without fallback", async () => {
   const testFailed = jest.fn();
   await expect(
-    procedure("match test", { foo: "bar" })
+    procedure("match test")
       .match([
         [fooHasNoBar, testFailed],
         [fooHasNoBar, testFailed],
       ])
-      .exec()
+      .exec({ foo: "bar" })
   ).rejects.toMatchInlineSnapshot(`
           [ProcedureError: Unhandled Internal Exception
 
             61 |   await expect(
-            62 |     procedure("match test", { foo: "bar" })
+            62 |     procedure("match test")
           > 63 |       .match([
                |        ^ Match statement unhandled, add a fallback
             64 |         [fooHasNoBar, testFailed],

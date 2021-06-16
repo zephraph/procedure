@@ -1,6 +1,6 @@
 import StackTracey from "stacktracey";
 import { Context } from "./context";
-import { ProcedureWithLazyContext } from "./procedure";
+import { Procedure } from "./procedure";
 
 export type Operation = Validate | Update | Load | Match | Do | GoTo;
 
@@ -23,7 +23,7 @@ export interface Load extends BaseOperation {
 
 export type MatchCondition<C> = (context: C) => boolean | Promise<boolean>;
 export type MatchAction<C extends Context> =
-  | ProcedureWithLazyContext<Partial<C>>
+  | Procedure<Partial<C>>
   | ((context: C) => void | Partial<C> | Promise<void | Partial<C>>);
 
 export type MatchStatement<C extends Context> = [
@@ -38,9 +38,7 @@ export interface Match extends BaseOperation {
 
 export interface Do extends BaseOperation {
   type: "do";
-  run:
-    | ProcedureWithLazyContext<Partial<any>>
-    | ((context: any) => void | Promise<void>);
+  run: Procedure<Partial<any>> | ((context: any) => void | Promise<void>);
 }
 
 export interface GoTo extends BaseOperation {

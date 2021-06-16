@@ -3,9 +3,12 @@ import { execute } from "./executors";
 import StackTracey from "stacktracey";
 import { last } from "./utils";
 
-export class Procedure<C extends Record<string, unknown>> {
+export class Procedure<
+  C extends Record<string, unknown>,
+  P extends Partial<C> = {}
+> {
   protected operations: Operation[] = [];
-  constructor(public readonly name: string, protected context: C) {}
+  constructor(public readonly name: string, protected partialContext: P) {}
 
   /**
    * A method to ensure a value stored in the `context` is correct
@@ -55,11 +58,7 @@ export class Procedure<C extends Record<string, unknown>> {
     return this;
   }
 
-  do(
-    doFn:
-      | ProcedureWithLazyContext<Partial<C>>
-      | ((context: C) => void | Promise<void>)
-  ) {
+  do(doFn: Procedure<Partial<C>> | ((context: C) => void | Promise<void>)) {
     this.operations.push({
       procedure: this.name,
       type: "do",
@@ -96,37 +95,18 @@ export class Procedure<C extends Record<string, unknown>> {
     });
     return this;
   }
-}
 
-export class ProcedureWithEagerContext<
-  C extends Record<string, unknown>
-> extends Procedure<C> {
-  exec() {
-    return execute(this.operations, this.context);
-  }
-}
-export class ProcedureWithLazyContext<
-  C extends Record<string, unknown>
-> extends Procedure<C> {
-  exec(context: C) {
+  exec(context: Omit<C, keyof P> & Partial<P>) {
+    Object.assign(context, { ...this.partialContext, ...context });
     return execute(this.operations, context);
   }
 }
 
-export function procedure<C extends Record<string, unknown>>(
-  name: string,
-  context: C
-): ProcedureWithEagerContext<C>;
-export function procedure<C extends Record<string, unknown>>(
-  name: string
-): ProcedureWithLazyContext<C>;
-export function procedure<C extends Record<string, unknown>>(
-  name: string,
-  context?: C
-) {
-  return context
-    ? new ProcedureWithEagerContext(name, context)
-    : new ProcedureWithLazyContext(name, {} as C);
+export function procedure<
+  C extends Record<string, unknown>,
+  P extends Partial<C> = {}
+>(name: string, contextDefaults: P = {} as P) {
+  return new Procedure<C, P>(name, contextDefaults);
 }
 
 /**
