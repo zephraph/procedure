@@ -6,7 +6,7 @@
   "module": "dist/esm/index.js",
   "types": "dist/index.d.js",
   "author": {
-    "email": "zephraph@gmail.com",
+    "email": "oss@just-be.dev",
     "name": "Justin Bennett",
     "url": "https://just-be.dev"
   },
