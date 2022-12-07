@@ -1,9 +1,7 @@
 import { procedure } from "../src/procedure";
 
 it("updates a context value", async () => {
-  const context = { foo: "bar" };
-  await procedure("update test")
+  await expect(procedure("update test", { foo: 'bar' })
     .update("foo", () => "baz")
-    .exec(context);
-  expect(context.foo).toBe("baz");
+    .exec()).resolves.toEqual({ foo: "baz" });
 });

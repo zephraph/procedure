@@ -3,111 +3,118 @@ import { execute } from "./executors";
 import StackTracey from "stacktracey";
 import { last } from "./utils";
 
-export class Procedure<
-  C extends Record<string, unknown>,
-  P extends Partial<C> = {}
-> {
-  protected operations: Operation[] = [];
-  constructor(public readonly name: string, protected partialContext: P) {}
 
-  /**
-   * A method to ensure a value stored in the `context` is correct
-   */
-  validate<K extends keyof C>(
-    key: K,
-    validateFn: (value: C[K]) => boolean | Promise<boolean>
-  ) {
-    this.operations.push({
-      procedure: this.name,
-      type: "validate",
-      run: validateFn,
-      argKey: key,
-      stackSource: new StackTracey().slice(1),
-    });
-    return this;
-  }
+type MaybePromise<T> = T | Promise<T>;
 
-  /**
-   * A method to update a value in context (usually from values already stored in the context)
-   */
-  update<K extends keyof C>(
-    key: K,
-    updateFn: (currentValue: C[K], context: C) => C[K] | Promise<C[K]>
-  ) {
-    this.operations.push({
-      procedure: this.name,
-      type: "update",
-      run: updateFn,
-      argKey: key,
-      stackSource: new StackTracey().slice(1),
-    });
-    return this;
-  }
+export interface Procedure<Context extends Record<string, unknown> = {}> {
+  readonly name: string;
+  load<LoadedData extends Record<string, unknown>>(loadFn: (context: Context) => MaybePromise<Partial<Context> & LoadedData>): Procedure<Context & LoadedData>;
+  validate<Key extends keyof Context>(key: Key, validateFn: (value: Context[Key]) => MaybePromise<boolean>): Procedure<Context>;
+  update<Key extends keyof Context>(key: Key, updateFn: (currentValue: Context[Key], context: Context) => MaybePromise<Context[Key]>): Procedure<Context>
+  do(doFn: Procedure<any> | ((context: Context) => MaybePromise<void>)): Procedure<Context>;
+  or(orFn: (err: Error, context: Context) => MaybePromise<void | Partial<Context>>): Procedure<Context>;
+  match(statements: MatchStatement<Context>[], otherwise?: MatchAction<Context>): Procedure<Context>;
+  exec(context?: Partial<Context>): Promise<Context>;
+}
 
-  /**
-   * A method intended to load data from some source and to store it in the
-   * `context`.
-   */
-  load(loadFn: (context: C) => Partial<C> | Promise<Partial<C>>) {
-    this.operations.push({
-      procedure: this.name,
-      type: "load",
-      run: loadFn,
-      stackSource: new StackTracey().slice(1),
-    });
-    return this;
-  }
+export const procedure = <Context extends Record<string, unknown> = {}>(name: string, initialContext?: Context): Procedure<Context> => {
+  const operations: Operation[] = [];
 
-  do(doFn: Procedure<Partial<C>> | ((context: C) => void | Promise<void>)) {
-    this.operations.push({
-      procedure: this.name,
-      type: "do",
-      run: doFn,
-      stackSource: new StackTracey().slice(1),
-    });
-    return this;
-  }
+  return {
+    name,
+    load(loadFn) {
+      operations.push({
+        procedure: name,
+        type: "load",
+        run: loadFn,
+        stackSource: new StackTracey().slice(1),
+      });
+      return this as any;
+    },
 
-  /**
-   * A method to add extra error handling to the previous function
-   */
-  or(
-    orFn: (
-      err: Error,
-      context: C
-    ) => void | Partial<C> | Promise<void | Partial<C>>
-  ) {
-    last(this.operations).onError = orFn;
-    return this;
-  }
+    update(key, updateFn) {
+      operations.push({
+        procedure: name,
+        type: "update",
+        run: updateFn,
+        argKey: key,
+        stackSource: new StackTracey().slice(1),
+      });
+      return this as any
+    },
 
-  /**
-   * A method that will execute multiple condition statements and run
-   * an associated action for the first condition that returns true.
-   */
-  match(statements: MatchStatement<C>[], otherwise?: MatchAction<C>) {
-    this.operations.push({
-      procedure: this.name,
-      type: "match",
-      statements,
-      otherwise,
-      stackSource: new StackTracey().slice(1),
-    });
-    return this;
-  }
+    validate(key, validateFn) {
+      operations.push({
+        procedure: name,
+        type: "validate",
+        run: validateFn,
+        argKey: key,
+        stackSource: new StackTracey().slice(1),
+      });
+      return this;
+    },
 
-  exec(context: Omit<C, keyof P> & Partial<P>) {
-    Object.assign(context, { ...this.partialContext, ...context });
-    return execute(this.operations, context);
+    do(doFn) {
+      operations.push({
+        procedure: name,
+        type: "do",
+        run: doFn,
+        stackSource: new StackTracey().slice(1),
+      });
+      return this;
+    },
+
+    match(statements, otherwise = undefined) {
+      operations.push({
+        procedure: name,
+        type: "match",
+        statements,
+        otherwise,
+        stackSource: new StackTracey().slice(1),
+      });
+      return this;
+    },
+
+    or(orFn) {
+      last(operations).onError = orFn;
+      return this;
+    },
+
+    // @ts-ignore
+    exec(context = {}) {
+      return execute(operations, { ...initialContext, ...context });
+    }
   }
 }
 
-export function procedure<
-  C extends Record<string, unknown>,
-  P extends Partial<C> = {}
->(name: string, contextDefaults: P = {} as P) {
-  return new Procedure<C, P>(name, contextDefaults);
-}
+// export class Procedure<
+//   C extends Record<string, unknown>,
+//   P extends Partial<C> = {}
+// > {
+//   protected operations: Operation[] = [];
+//   constructor(public readonly name: string, protected partialContext: P) { }
+
+//   /**
+//    * A method that will execute multiple condition statements and run
+//    * an associated action for the first condition that returns true.
+//    */
+//   match(statements: MatchStatement<C>[], otherwise?: MatchAction<C>) {
+//     this.operations.push({
+//       procedure: this.name,
+//       type: "match",
+//       statements,
+//       otherwise,
+//       stackSource: new StackTracey().slice(1),
+//     });
+//     return this;
+//   }
+
+// export function procedure<
+//   C extends Record<string, unknown>,
+//   P extends Partial<C> = {}
+// >(name: string, contextDefaults: P = {} as P) {
+//   return new Procedure<C, P>(name, contextDefaults);
+// }
 
 /**
  * procedure('install', context)

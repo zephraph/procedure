@@ -6,7 +6,7 @@
   "module": "dist/esm/index.js",
   "types": "dist/index.d.js",
   "author": {
-    "email": "zephraph@gmail.com",
+    "email": "oss@just-be.dev",
     "name": "Justin Bennett",
     "url": "https://just-be.dev"
   },
@@ -27,7 +27,8 @@
   "dependencies": {
     "endent": "^2.0.1",
     "stacktracey": "^2.1.7",
-    "ts-union-tools": "^0.0.1"
+    "ts-pattern": "^4.0.6",
+    "type-fest": "^3.3.0"
   },
   "license": "MIT",
   "publishConfig": {

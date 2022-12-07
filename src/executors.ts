@@ -1,5 +1,5 @@
 import StackTracey from "stacktracey";
-import { matchOn } from "ts-union-tools";
+import { match as matchOn } from "ts-pattern";
 import { createError, createMatchError, ERROR } from "./error";
 import {
   Validate,
@@ -11,10 +11,11 @@ import {
   Do,
   Update,
 } from "./operations";
-import { Procedure } from "./procedure";
 import { last, to, style } from "./utils";
 import { bold } from "chalk";
 import { Context } from "./context";
+
+const invokeAction = <Context extends Record<string, unknown>>(action: MatchAction<any>, context: Context) => typeof action === "object" && "exec" in action ? action.exec(context) : action(context);
 
 const hasErrorHandler = (op: Operation) => !!op.onError;
 
@@ -33,8 +34,7 @@ const validate: OperationExecutor<Validate> = async (op, context) => {
   if (!result)
     throw createError(
       op.stackSource,
-      `${op.argKey} is invalid ${
-        op.run.name ? `according to ${style(op.run.name, bold)}` : ""
+      `${op.argKey} is invalid ${op.run.name ? `according to ${style(op.run.name, bold)}` : ""
       }`,
       ERROR.INVALID(op.argKey)
     );
@@ -48,7 +48,7 @@ const update: OperationExecutor<Update> = async (op, context) => {
     if (err) return await handleError(op, err, context);
     context[op.argKey] = result;
   } catch (err) {
-    return await handleError(op, err, context);
+    return await handleError(op, err as Error, context);
   }
 };
 
@@ -77,7 +77,7 @@ const match: OperationExecutor<Match> = async (op, context) => {
     statement,
   ] of op.statements.entries()) {
     const conditions = statement.slice(0, -1) as MatchCondition<any>[];
-    const action = last(statement) as MatchAction<any>;
+    const action = last(statement) as MatchAction<typeof context>;
     for (let [index, condition] of conditions.entries()) {
       let [err, result] = await to(condition(context));
       if (err) {
@@ -99,7 +99,7 @@ const match: OperationExecutor<Match> = async (op, context) => {
       if (!result) continue statementLoop;
     }
     let [err, result] = await to(
-      action instanceof Procedure ? action.exec(context) : action(context)
+      invokeAction(action, context)
     );
     if (err) {
       const temp = await handleError(op, err, context);
@@ -124,9 +124,7 @@ const match: OperationExecutor<Match> = async (op, context) => {
   }
   if (op.otherwise) {
     const [err, result] = await to(
-      op.otherwise instanceof Procedure
-        ? op.otherwise.exec(context)
-        : op.otherwise(context)
+      invokeAction(op.otherwise, context)
     );
     if (err) return await handleError(op, err, context);
     if (result) {
@@ -144,34 +142,34 @@ const match: OperationExecutor<Match> = async (op, context) => {
 const doEx: OperationExecutor<Do> = async (op, context) => {
   try {
     const [err] = await to(
-      op.run instanceof Procedure ? op.run.exec(context) : op.run(context)
+      invokeAction(op.run, context)
     );
     if (err) return await handleError(op, err, context);
   } catch (err) {
-    return await handleError(op, err, context);
+    return await handleError(op, err as Error, context);
   }
 };
 
 export const execute = async (operations: Operation[], context: Context) => {
   for (let operation of operations) {
-    let result = await matchOn("type", operation, {
-      validate: (op) => validate(op, context),
-      update: (op) => update(op, context),
-      load: (op) => load(op, context),
-      match: (op) => match(op, context),
-      do: (op) => doEx(op, context),
-      _: (op) => {
+    let result = await matchOn(operation)
+      .with({ type: 'validate' }, (op) => validate(op, context))
+      .with({ type: 'update' }, (op) => update(op, context))
+      .with({ type: 'load' }, (op) => load(op, context))
+      .with({ type: 'match' }, (op) => match(op, context))
+      .with({ type: 'do' }, (op) => doEx(op, context))
+      .otherwise((op) => {
         throw createError(
           op.stackSource,
           "Invalid operation",
           ERROR.INVALID_OP
         );
-      },
-    });
+      })
     if (result !== undefined) {
       throw createError(operation.stackSource, result, ERROR.UNKNOWN_ERR);
     }
   }
+  return context;
 };
 
 type OperationExecutor<O extends Operation> = (
