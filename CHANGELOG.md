@@ -1,3 +1,19 @@
+# v2.0.0 (Wed Dec 07 2022)
+
+#### 💥 Breaking Change
+
+- Refactor for better typing behavior on context [#10](https://github.com/zephraph/procedure/pull/10) ([@zephraph](https://github.com/zephraph))
+
+#### 📝 Documentation
+
+- Update readme [#9](https://github.com/zephraph/procedure/pull/9) ([@zephraph](https://github.com/zephraph))
+
+#### Authors: 1
+
+- Justin Bennett ([@zephraph](https://github.com/zephraph))
+
+---
+
 # v1.0.0 (Wed Jun 16 2021)
 
 #### 💥 Breaking Change
