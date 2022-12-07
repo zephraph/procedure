@@ -23,7 +23,7 @@ export interface Load extends BaseOperation {
 
 export type MatchCondition<C> = (context: C) => boolean | Promise<boolean>;
 export type MatchAction<C extends Context> =
-  | Procedure<Partial<C>>
+  | Procedure<Context>
   | ((context: C) => void | Partial<C> | Promise<void | Partial<C>>);
 
 export type MatchStatement<C extends Context> = [

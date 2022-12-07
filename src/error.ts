@@ -2,7 +2,6 @@ import { codeFrameColumns } from "@babel/code-frame";
 import StackTracey from "stacktracey";
 import { yellow, bold, dim, red } from "chalk";
 import { Context } from "./context";
-import { Operation } from "./operations";
 import { parseMatch } from "./parsers";
 import { style } from "./utils";
 import asTable from "as-table";
@@ -24,7 +23,7 @@ export const ERROR = {
   UNKNOWN_ERR: "unknown-error",
   NO_MATCH: "unmatched-value",
   RUNTIME_ERR: "runtime-error",
-  INVALID: <C extends Context>(key: keyof C) => `validate-error:${key}`,
+  INVALID: <C extends Context>(key: keyof C) => `validate-error:${String(key)}`,
   MATCH_CHECK_ERR: (check: string) => `match-check-error:${check}`,
 } as const;
 
@@ -47,34 +46,33 @@ export const createError = (
   const sourceTrace = trace.withSource(trace.items[0]);
   const lines = sourceTrace.sourceFile?.text;
   const header = `Unhandled Internal Exception\n\n`;
-  let footer = `\n\n${
-    (errTrace &&
-      "which...\n" +
-        asTable(
-          errTrace.items
-            .map((item, index) =>
-              index === 0
-                ? [
-                    style(
-                      `  ${style("failed:", red)} ${item.calleeShort}`,
-                      bold
-                    ),
-                    style(item.fileShort + formatFilePosition(item), bold),
-                  ]
-                : [
-                    `  called: ${item.calleeShort}`,
-                    item.fileShort + formatFilePosition(item),
-                  ]
-            )
-            .reverse()
-        ) +
-        `\n${" ".repeat(10)}${style(
-          "^".repeat(errTrace.items[0].calleeShort.split(" ")[0].length),
-          bold,
-          red
-        )}️ ${style("this threw the exception", bold, yellow)}`) ||
+  let footer = `\n\n${(errTrace &&
+    "which...\n" +
+    asTable(
+      errTrace.items
+        .map((item, index) =>
+          index === 0
+            ? [
+              style(
+                `  ${style("failed:", red)} ${item.calleeShort}`,
+                bold
+              ),
+              style(item.fileShort + formatFilePosition(item), bold),
+            ]
+            : [
+              `  called: ${item.calleeShort}`,
+              item.fileShort + formatFilePosition(item),
+            ]
+        )
+        .reverse()
+    ) +
+    `\n${" ".repeat(10)}${style(
+      "^".repeat(errTrace.items[0].calleeShort.split(" ")[0].length),
+      bold,
+      red
+    )}️ ${style("this threw the exception", bold, yellow)}`) ||
     ""
-  }`;
+    }`;
 
   const message = err instanceof Error ? err.message.split("\n")[0] : err;
 
@@ -83,24 +81,24 @@ export const createError = (
 
   return new ProcedureError(
     header +
-      codeFrameColumns(
-        lines!,
-        {
-          start: {
-            line,
-            column,
-          },
+    codeFrameColumns(
+      lines!,
+      {
+        start: {
+          line,
+          column,
         },
-        {
-          message,
-          highlightCode: process.env.NODE_ENV === "test" ? false : true,
-        }
-      ) +
-      `\n\n${style(
-        `${sourceTrace.fileRelative}${formatFilePosition(sourceTrace)}`,
-        dim
-      )}` +
-      footer,
+      },
+      {
+        message,
+        highlightCode: process.env.NODE_ENV === "test" ? false : true,
+      }
+    ) +
+    `\n\n${style(
+      `${sourceTrace.fileRelative}${formatFilePosition(sourceTrace)}`,
+      dim
+    )}` +
+    footer,
     code
   );
 };
@@ -139,27 +137,27 @@ export const createMatchError = (
 
   return new ProcedureError(
     header +
-      codeFrameColumns(
-        text,
-        {
-          start: {
-            line,
-            column,
-          },
-          end: {
-            line,
-            column: column + length,
-          },
+    codeFrameColumns(
+      text,
+      {
+        start: {
+          line,
+          column,
         },
-        {
-          message,
-          highlightCode: process.env.NODE_ENV === "test" ? false : true,
-        }
-      ) +
-      `\n\n${style(`${stack.fileRelative}:${line}:${column}`, dim)}\n\n` +
-      footer +
-      // dim("\n───────────────────────────────────────────────") +
-      details,
+        end: {
+          line,
+          column: column + length,
+        },
+      },
+      {
+        message,
+        highlightCode: process.env.NODE_ENV === "test" ? false : true,
+      }
+    ) +
+    `\n\n${style(`${stack.fileRelative}:${line}:${column}`, dim)}\n\n` +
+    footer +
+    // dim("\n───────────────────────────────────────────────") +
+    details,
     code
   );
 };

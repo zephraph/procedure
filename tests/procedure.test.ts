@@ -11,7 +11,7 @@ it("allows specifying default partial context on creation", async () => {
 
   const doFn = jest.fn();
 
-  await procedure<Context, typeof defaults>("test", defaults)
+  await procedure("test", defaults)
     .do(doFn)
     .exec({ works: true });
 
@@ -25,13 +25,13 @@ it("overrides default partial context", async () => {
   type Context = {
     foo: string;
   };
-  const defaults: Partial<Context> = {
+  const defaults = {
     foo: "bar",
   };
 
   const doFn = jest.fn();
 
-  await procedure<Context, typeof defaults>("test", defaults)
+  await procedure<Context>("test", defaults)
     .do(doFn)
     .exec({ foo: "baz" });
 

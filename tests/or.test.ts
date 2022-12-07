@@ -3,7 +3,7 @@ import { procedure } from "../src/procedure";
 it("should handle errors from do", async () => {
   const context = {};
   const err = "err";
-  const orFn = jest.fn().mockImplementation(() => {});
+  const orFn = jest.fn().mockImplementation(() => { });
   await procedure("do test")
     .do(() => {
       throw err;
